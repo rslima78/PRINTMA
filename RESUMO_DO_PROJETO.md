@@ -22,6 +22,8 @@ Todas as etapas descritas no plano de execução original foram implementadas co
 8. **Segurança e Perfil:**
    - Adicionada funcionalidade de "Alterar Senha" para Administradores e Operadores, permitindo o gerenciamento autônomo de suas credenciais.
    - Coordenadores continuam sendo gerenciados centralmente pelo Administrador por questões de segurança de dados.
+9. **Melhorias de Interface (UI):**
+   - Corrigido o problema de legibilidade das fontes em modo escuro do sistema (Dark Mode), desativando heranças de cor indesejadas no `globals.css` para garantir alto contraste nos formulários e painéis brancos.
 
 ---
 
