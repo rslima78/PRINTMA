@@ -27,10 +27,10 @@ export default function CoordenadorDashboard() {
   const soliciarReimpressao = async () => {
     if (!obsReimpressao.trim()) return;
     setEnviando(true);
-    await fetch(`/api/pedidos/${modalReimprimir}/reimprimir`, {
+    await fetch(`/api/pedidos/${modalReimprimir}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ obs_reimpressao: obsReimpressao }),
+      body: JSON.stringify({ action: "reimprimir", obs_reimpressao: obsReimpressao }),
     });
     setModalReimprimir(null);
     setObsReimpressao("");

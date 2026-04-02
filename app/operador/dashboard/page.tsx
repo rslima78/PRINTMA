@@ -25,7 +25,11 @@ export default function OperadorDashboard() {
   });
 
   const togglePrioridade = async (id: string) => {
-    await fetch(`/api/pedidos/${id}/prioridade`, { method: "PATCH" });
+    await fetch(`/api/pedidos/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "prioridade" })
+    });
     await carregar();
     if (pedidoSelecionado?.id === id) {
       const res = await fetch(`/api/pedidos?ativo=true`);
@@ -36,10 +40,10 @@ export default function OperadorDashboard() {
 
   const atualizarStatus = async (id: string, status: string) => {
     setAtualizando(true);
-    await fetch(`/api/pedidos/${id}/status`, {
+    await fetch(`/api/pedidos/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ action: "status", status }),
     });
     await carregar();
     setPedidoSelecionado(null);

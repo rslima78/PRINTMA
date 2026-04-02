@@ -9,22 +9,26 @@
   Creating an optimized production build ...
 Ô£ô Compiled successfully in 5.4s
   Running TypeScript ...
-Failed to type check.
+  Finished TypeScript in 5.7s ...
+  Collecting page data using 11 workers ...
+Warning: Cannot load "@napi-rs/canvas" package: "Error: Cannot find module '@napi-rs/canvas'
+Require stack:
+- D:\ROOT\node_modules\pdf-parse\dist\pdf-parse\cjs\index.cjs".
+Warning: Cannot polyfill `DOMMatrix`, rendering may be broken.
+Warning: Cannot polyfill `ImageData`, rendering may be broken.
+Warning: Cannot polyfill `Path2D`, rendering may be broken.
+ReferenceError: DOMMatrix is not defined
+    at instantiateModule (D:\OneDrive\Maria Anita\Maria Anita 2026\projetoPRINTMA\app\.next\server\chunks\[turbopack]_runtime.js:853:9)
+    at getOrInstantiateModuleFromParent (D:\OneDrive\Maria Anita\Maria Anita 2026\projetoPRINTMA\app\.next\server\chunks\[turbopack]_runtime.js:877:12)
+    at Context.commonJsRequire [as r] (D:\OneDrive\Maria Anita\Maria Anita 2026\projetoPRINTMA\app\.next\server\chunks\[turbopack]_runtime.js:302:12)
+    at instantiateModule (D:\OneDrive\Maria Anita\Maria Anita 2026\projetoPRINTMA\app\.next\server\chunks\[turbopack]_runtime.js:853:9)
+    at instantiateRuntimeModule (D:\OneDrive\Maria Anita\Maria Anita 2026\projetoPRINTMA\app\.next\server\chunks\[turbopack]_runtime.js:882:12)
+    at getOrInstantiateRuntimeModule (D:\OneDrive\Maria Anita\Maria Anita 2026\projetoPRINTMA\app\.next\server\chunks\[turbopack]_runtime.js:895:12)
+    at Object.m (D:\OneDrive\Maria Anita\Maria Anita 2026\projetoPRINTMA\app\.next\server\chunks\[turbopack]_runtime.js:898:18)
+    at Object.<anonymous> (D:\OneDrive\Maria Anita\Maria Anita 2026\projetoPRINTMA\app\.next\server\app\api\upload-pdf\route.js:8:3)
 
-.next/types/validator.ts:162:31
-Type error: Type 'typeof import("D:/OneDrive/Maria Anita/Maria Anita 2026/projetoPRINTMA/app/app/api/admin/associacoes/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/admin/associacoes/[id]">'.
-  Types of property 'DELETE' are incompatible.
-    Type '(req: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ success: boolean; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
-      Types of parameters '__1' and 'context' are incompatible.
-        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
-          Types of property 'params' are incompatible.
-            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
-
-  160 |   type __IsExpected<Specific extends RouteHandlerConfig<"/api/admin/associacoes/[id]">> =...
-  161 |   const handler = {} as typeof import("../../app/api/admin/associacoes/[id]/route.js")
-> 162 |   type __Check = __IsExpected<typeof handler>
-      |                               ^
-  163 |   // @ts-ignore
-  164 |   type __Unused = __Check
-  165 | }
-Next.js build worker exited with code: 1 and signal: null
+> Build error occurred
+Error: Failed to collect page data for /api/upload-pdf
+    at ignore-listed frames {
+  type: 'Error'
+}
