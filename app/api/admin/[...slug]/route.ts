@@ -9,8 +9,20 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug: str
     const params = await props.params;
     const slug = params.slug;
     const session = await getServerSession(authOptions);
+    const userPerfil = session ? (session.user as any).perfil : null;
 
-    if (!session || (session.user as any).perfil !== "ADMIN") {
+    if (!session) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    }
+
+    const isAdmin = userPerfil === "ADMIN";
+    const isCoordenador = userPerfil === "COORDENADOR";
+
+    // Permitir COORDENADOR acessar associações e professores
+    const canAccessAssociacoes = slug[0] === "associacoes";
+    const canAccessProfessores = slug[0] === "importar" && slug[1] === "professores";
+
+    if (!isAdmin && (!isCoordenador || (!canAccessAssociacoes && !canAccessProfessores))) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 

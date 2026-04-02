@@ -52,8 +52,21 @@ export default function NovoPedidoPage() {
   const [enviando, setEnviando] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/importar/professores").then((r) => r.json()).then(setProfessores);
-    fetch("/api/admin/associacoes").then((r) => r.json()).then(setAssociacoes);
+    fetch("/api/admin/importar/professores")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setProfessores(data);
+        else console.error("Erro ao carregar professores:", data);
+      })
+      .catch((err) => console.error(err));
+
+    fetch("/api/admin/associacoes")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setAssociacoes(data);
+        else console.error("Erro ao carregar associações:", data);
+      })
+      .catch((err) => console.error(err));
   }, []);
 
   // Derivados
