@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function ImportarCSV({ colunas, onImportar, exemplo }: Props) {
-  const [preview, setPreview] = useState<Record<string, string>[]>([]);
+  const [parsedData, setParsedData] = useState<Record<string, string>[]>([]);
   const [fileName, setFileName] = useState("");
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
@@ -35,7 +35,7 @@ export function ImportarCSV({ colunas, onImportar, exemplo }: Props) {
           setErro(`Colunas ausentes no CSV: ${faltando.join(", ")}`);
           return;
         }
-        setPreview(data.slice(0, 10));
+        setParsedData(data);
       },
       error: () => setErro("Erro ao ler arquivo CSV"),
     });
@@ -48,12 +48,12 @@ export function ImportarCSV({ colunas, onImportar, exemplo }: Props) {
   };
 
   const handleConfirmar = async () => {
-    if (preview.length === 0) return;
+    if (parsedData.length === 0) return;
     setLoading(true);
     try {
-      await onImportar(preview);
-      setSucesso(`${preview.length} itens importados com sucesso!`);
-      setPreview([]);
+      await onImportar(parsedData);
+      setSucesso(`${parsedData.length} itens importados com sucesso!`);
+      setParsedData([]);
       setFileName("");
     } catch (e: any) {
       setErro(e.message || "Erro ao importar");
@@ -86,9 +86,9 @@ export function ImportarCSV({ colunas, onImportar, exemplo }: Props) {
       {erro && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-2">{erro}</p>}
       {sucesso && <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-2">{sucesso}</p>}
 
-      {preview.length > 0 && (
+      {parsedData.length > 0 && (
         <div>
-          <p className="text-sm font-semibold text-gray-600 mb-2">Preview ({preview.length} registros):</p>
+          <p className="text-sm font-semibold text-gray-600 mb-2">Preview (Mostrando até 10 de {parsedData.length} registros):</p>
           <div className="overflow-x-auto rounded-lg border border-gray-200">
             <table className="text-xs w-full">
               <thead className="bg-gray-50">
@@ -99,7 +99,7 @@ export function ImportarCSV({ colunas, onImportar, exemplo }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {preview.map((row, i) => (
+                {parsedData.slice(0, 10).map((row, i) => (
                   <tr key={i} className="border-t border-gray-100 hover:bg-gray-50">
                     {colunas.map((c) => (
                       <td key={c} className="px-3 py-1.5 text-gray-700">{row[c]}</td>
@@ -114,7 +114,7 @@ export function ImportarCSV({ colunas, onImportar, exemplo }: Props) {
             disabled={loading}
             className="mt-3 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
           >
-            {loading ? "Importando..." : `✓ Confirmar Importação (${preview.length})`}
+            {loading ? "Importando..." : `✓ Confirmar Importação (${parsedData.length})`}
           </button>
         </div>
       )}
