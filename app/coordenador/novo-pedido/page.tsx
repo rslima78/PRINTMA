@@ -87,7 +87,7 @@ export default function NovoPedidoPage() {
       const fd = new FormData();
       fd.append("file", file);
       setUploadProgress(30);
-      const res = await fetch("/api/upload-pdf", { method: "POST", body: fd });
+      const res = await fetch("/api/upload/pdf", { method: "POST", body: fd });
       setUploadProgress(80);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);

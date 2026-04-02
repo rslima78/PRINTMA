@@ -37,7 +37,7 @@ export default function CoordenadoresPage() {
       if (foto) {
         const fd = new FormData();
         fd.append("file", foto);
-        const res = await fetch("/api/upload-imagem", { method: "POST", body: fd });
+        const res = await fetch("/api/upload/imagem", { method: "POST", body: fd });
         const data = await res.json();
         foto_url = data.url;
       }
