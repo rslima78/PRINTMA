@@ -83,7 +83,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ slug?: s
           pdf_url: original.pdf_url, pdf_paginas: original.pdf_paginas, num_copias: original.num_copias, folhas_necessarias: original.folhas_necessarias,
           prazo: calcularPrazo(), status: "AGUARDANDO", prioridade: true, obs_reimpressao,
           turmas: {
-            create: original.turmas.map((t) => ({ turma_id: t.turma_id, turma_nome: t.turma_nome, num_estudantes: t.num_estudantes })),
+            create: original.turmas.map((t: any) => ({ turma_id: t.turma_id, turma_nome: t.turma_nome, num_estudantes: t.num_estudantes })),
           },
         },
       });
