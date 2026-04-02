@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Usuario {
+  id        String   @id @default(cuid())
+  nome      String
+  email     String   @unique
+  senha     String
+  perfil    Perfil
+  foto_url  String?
+  ativo     Boolean  @default(true)
+  criado_em DateTime @default(now())
+  pedidos   Pedido[]
+}
+
+model Disciplina {
+  id          String       @id @default(cuid())
+  nome        String       @unique
+  associacoes Associacao[]
+}
+
+model Professor {
+  id          String       @id @default(cuid())
+  nome        String
+  associacoes Associacao[]
+  pedidos     Pedido[]
+}
+
+model Turma {
+  id             String           @id @default(cuid())
+  nome           String
+  num_estudantes Int
+  associacoes    AssociacaoTurma[]
+  pedidoTurmas   PedidoTurma[]
+}
+
+model Associacao {
+  id            String           @id @default(cuid())
+  professor     Professor        @relation(fields: [professor_id], references: [id])
+  professor_id  String
+  disciplina    Disciplina       @relation(fields: [disciplina_id], references: [id])
+  disciplina_id String
+  turmas        AssociacaoTurma[]
+}
+
+model AssociacaoTurma {
+  associacao    Associacao @relation(fields: [associacao_id], references: [id], onDelete: Cascade)
+  associacao_id String
+  turma         Turma      @relation(fields: [turma_id], references: [id])
+  turma_id      String
+
+  @@id([associacao_id, turma_id])
+}
+
+model Pedido {
+  id                 String          @id @default(cuid())
+  coordenador        Usuario         @relation(fields: [coordenador_id], references: [id])
+  coordenador_id     String
+  professor          Professor       @relation(fields: [professor_id], references: [id])
+  professor_id       String
+  disciplina_id      String
+  disciplina_nome    String
+  tipo_avaliacao     TipoAvaliacao
+  observacao         String?
+  pdf_url            String
+  pdf_paginas        Int
+  num_copias         Int
+  folhas_necessarias Int
+  prazo              DateTime
+  status             StatusPedido    @default(AGUARDANDO)
+  prioridade         Boolean         @default(false)
+  obs_reimpressao    String?
+  criado_em          DateTime        @default(now())
+  atualizado_em      DateTime        @updatedAt
+  turmas             PedidoTurma[]
+  historico          HistoricoStatus[]
+}
+
+model PedidoTurma {
+  pedido    Pedido @relation(fields: [pedido_id], references: [id], onDelete: Cascade)
+  pedido_id String
+  turma     Turma  @relation(fields: [turma_id], references: [id])
+  turma_id  String
+  turma_nome String
+  num_estudantes Int
+
+  @@id([pedido_id, turma_id])
+}
+
+model HistoricoStatus {
+  id              String       @id @default(cuid())
+  pedido          Pedido       @relation(fields: [pedido_id], references: [id], onDelete: Cascade)
+  pedido_id       String
+  status_anterior StatusPedido
+  status_novo     StatusPedido
+  alterado_por    String
+  criado_em       DateTime     @default(now())
+}
+
+enum Perfil {
+  ADMIN
+  COORDENADOR
+  OPERADOR
+}
+
+enum TipoAvaliacao {
+  TESTE
+  PROVA
+  OUTROS
+}
+
+enum StatusPedido {
+  AGUARDANDO
+  EM_IMPRESSAO
+  CONCLUIDO
+  CANCELADO
+}
