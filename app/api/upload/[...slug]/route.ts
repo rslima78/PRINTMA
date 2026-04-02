@@ -30,17 +30,12 @@ export async function POST(req: NextRequest, props: { params: Promise<{ slug: st
 
       const resultado = await new Promise<any>((resolve, reject) => {
         cloudinary.uploader.upload_stream(
-          { resource_type: "raw", folder: "impressoes", public_id: `pedido_${Date.now()}`, format: "pdf" },
+          { resource_type: "image", folder: "impressoes", public_id: `pedido_${Date.now()}`, format: "pdf" },
           (error, result) => { if (error) reject(error); else resolve(result); }
         ).end(buffer);
       });
 
-      let finalUrl = resultado.secure_url;
-      if (finalUrl.includes("/upload/")) {
-        finalUrl = finalUrl.replace("/upload/", "/upload/fl_attachment/");
-      }
-
-      return NextResponse.json({ pdf_url: finalUrl, pdf_paginas: numPaginas, nome_arquivo: file.name });
+      return NextResponse.json({ pdf_url: resultado.secure_url, pdf_paginas: numPaginas, nome_arquivo: file.name });
     } 
     else if (slug[0] === "imagem") {
       const formData = await req.formData();

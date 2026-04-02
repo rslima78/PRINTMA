@@ -3,6 +3,40 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 import { calcularFolhas, calcularPrazo } from "@/lib/utils";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
+
+function assinarUrl(url: string) {
+  if (!url || !url.includes("res.cloudinary.com")) return url;
+  try {
+    const urlObj = new URL(url);
+    const pathParts = urlObj.pathname.split("/");
+    const uploadIdx = pathParts.indexOf("upload");
+    if (uploadIdx === -1) return url;
+
+    const resourceType = pathParts[uploadIdx - 1];
+    // O Public ID começa após a versão (v1234567)
+    const publicIdWithExt = pathParts.slice(uploadIdx + 2).join("/");
+    
+    // Para 'image', o Cloudinary prefere o publicId sem a extensão final se for para aplicar transformação
+    const publicId = resourceType === "image" ? publicIdWithExt.replace(/\.[^/.]+$/, "") : publicIdWithExt;
+
+    return cloudinary.url(publicId, {
+      resource_type: resourceType,
+      sign_url: true,
+      flags: resourceType === "image" ? "attachment" : undefined,
+      secure: true,
+      format: resourceType === "image" ? "pdf" : undefined
+    });
+  } catch (e) {
+    return url;
+  }
+}
 
 export async function GET(req: NextRequest, props: { params: Promise<{ slug?: string[] }> }) {
   try {
@@ -32,7 +66,12 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug?: st
       orderBy: [{ prioridade: "desc" }, { criado_em: "asc" }],
     });
 
-    return NextResponse.json(pedidos);
+    const pedidosComUrlAssinada = pedidos.map(p => ({
+      ...p,
+      pdf_url: assinarUrl(p.pdf_url)
+    }));
+
+    return NextResponse.json(pedidosComUrlAssinada);
   } catch (error) {
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }

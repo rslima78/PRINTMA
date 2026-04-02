@@ -5,13 +5,6 @@ import { ResumoPedido } from "@/components/ResumoPedido";
 import { FotoAvatar } from "@/components/FotoAvatar";
 import { calcularUrgencia } from "@/lib/utils";
 
-const getDownloadUrl = (url: string) => {
-  if (!url) return "#";
-  if (url.includes("res.cloudinary.com") && url.includes("/upload/") && !url.includes("/fl_attachment")) {
-    return url.replace("/upload/", "/upload/fl_attachment/");
-  }
-  return url;
-};
 
 export default function OperadorDashboard() {
   const [pedidos, setPedidos] = useState<any[]>([]);
@@ -126,7 +119,7 @@ export default function OperadorDashboard() {
                     <p className="text-sm font-semibold text-gray-800">{p.professor.nome}</p>
                     <p className="text-xs text-gray-500">{p.disciplina_nome} • {p.tipo_avaliacao}</p>
                   </div>
-                  <a href={getDownloadUrl(p.pdf_url)} target="_blank" rel="noopener noreferrer"
+                  <a href={`/api/pedidos/download?id=${p.id}`} target="_blank" rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
                     className="ml-auto text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200">
                     ⬇ PDF
@@ -186,7 +179,7 @@ export default function OperadorDashboard() {
 
             <div className="border-t border-gray-100 pt-4 space-y-2">
               <a
-                href={getDownloadUrl(pedidoSelecionado.pdf_url)}
+                href={`/api/pedidos/download?id=${pedidoSelecionado.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors text-sm"
