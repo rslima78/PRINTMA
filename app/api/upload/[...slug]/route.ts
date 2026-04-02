@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
-const pdfParse = require("pdf-parse");
+import { PDFDocument } from "pdf-lib";
 
 export const dynamic = "force-dynamic";
 
@@ -25,8 +25,8 @@ export async function POST(req: NextRequest, props: { params: Promise<{ slug: st
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      const pdfData = await pdfParse(buffer);
-      const numPaginas = pdfData.numpages;
+      const pdfDoc = await PDFDocument.load(buffer);
+      const numPaginas = pdfDoc.getPageCount();
 
       const resultado = await new Promise<any>((resolve, reject) => {
         cloudinary.uploader.upload_stream(
