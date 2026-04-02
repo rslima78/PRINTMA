@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
-const pdfParse = require("pdf-parse");
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +11,7 @@ cloudinary.config({
 
 export async function POST(req: NextRequest) {
   try {
+    const pdfParse = require("pdf-parse");
     const formData = await req.formData();
     const file = formData.get("file") as File;
     if (!file) return NextResponse.json({ error: "Nenhum arquivo enviado" }, { status: 400 });
