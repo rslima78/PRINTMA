@@ -35,7 +35,12 @@ export async function POST(req: NextRequest, props: { params: Promise<{ slug: st
         ).end(buffer);
       });
 
-      return NextResponse.json({ pdf_url: resultado.secure_url, pdf_paginas: numPaginas, nome_arquivo: file.name });
+      let finalUrl = resultado.secure_url;
+      if (finalUrl.includes("/upload/")) {
+        finalUrl = finalUrl.replace("/upload/", "/upload/fl_attachment/");
+      }
+
+      return NextResponse.json({ pdf_url: finalUrl, pdf_paginas: numPaginas, nome_arquivo: file.name });
     } 
     else if (slug[0] === "imagem") {
       const formData = await req.formData();
