@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
+const pdfParse = require("pdf-parse");
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,6 @@ export async function POST(req: NextRequest, props: { params: Promise<{ slug: st
     const slug = params.slug;
 
     if (slug[0] === "pdf") {
-      const pdfParse = require("pdf-parse");
       const formData = await req.formData();
       const file = formData.get("file") as File;
       if (!file) return NextResponse.json({ error: "Nenhum arquivo enviado" }, { status: 400 });
@@ -57,6 +57,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ slug: st
 
     return NextResponse.json({ error: "URL inválida" }, { status: 404 });
   } catch (error: any) {
-    return NextResponse.json({ error: "Erro ao processar arquivo" }, { status: 500 });
+    console.error("ERRO NO UPLOAD/PROCESSAMENTO:", error);
+    return NextResponse.json({ error: "Erro ao processar arquivo", detalhe: error.message || error.toString() }, { status: 500 });
   }
 }
