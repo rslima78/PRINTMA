@@ -6,6 +6,7 @@ import { signOut } from "next-auth/react";
 const navItems = [
   { href: "/operador/dashboard", label: "Fila de Impressão", icon: "🖨️" },
   { href: "/operador/historico", label: "Histórico", icon: "📊" },
+  { href: "/operador/minha-conta", label: "Minha Conta", icon: "🔑" },
 ];
 
 export default function OperadorLayout({ children }: { children: React.ReactNode }) {
