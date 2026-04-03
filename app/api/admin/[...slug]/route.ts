@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug: str
 
     if (slug[0] === "coordenadores") {
       const coordenadores = await prisma.usuario.findMany({
-        where: { perfil: "COORDENADOR" },
+        where: { perfil: "COORDENADOR", deletado: false },
         select: { id: true, nome: true, email: true, foto_url: true, ativo: true, criado_em: true },
         orderBy: { nome: "asc" },
       });
@@ -133,8 +133,15 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ slug: s
     if (!session || (session.user as any).perfil !== "ADMIN") return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
     if (slug[0] === "coordenadores") {
-      const { id, ativo } = await req.json();
-      const atualizado = await prisma.usuario.update({ where: { id }, data: { ativo } });
+      const { id, ativo, nome, email, senha, foto_url } = await req.json();
+      const data: any = {};
+      if (ativo !== undefined) data.ativo = ativo;
+      if (nome) data.nome = nome;
+      if (email) data.email = email;
+      if (foto_url !== undefined) data.foto_url = foto_url;
+      if (senha) data.senha = await bcrypt.hash(senha, 10);
+
+      const atualizado = await prisma.usuario.update({ where: { id }, data });
       return NextResponse.json(atualizado);
     }
 
@@ -161,6 +168,14 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ slug: 
       if (entidade === "disciplinas") await prisma.disciplina.delete({ where: { id } });
       else if (entidade === "professores") await prisma.professor.delete({ where: { id } });
       else if (entidade === "turmas") await prisma.turma.delete({ where: { id } });
+      return NextResponse.json({ success: true });
+    }
+    else if (slug[0] === "coordenadores") {
+      const { id } = await req.json();
+      await prisma.usuario.update({
+        where: { id },
+        data: { deletado: true, ativo: false }
+      });
       return NextResponse.json({ success: true });
     }
 

@@ -18,6 +18,7 @@ export default function CoordenadoresPage() {
   const [foto, setFoto] = useState<File | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
+  const [editandoId, setEditandoId] = useState<string | null>(null);
 
   const carregar = async () => {
     const res = await fetch("/api/admin/coordenadores");
@@ -42,13 +43,14 @@ export default function CoordenadoresPage() {
         foto_url = data.url;
       }
       const res = await fetch("/api/admin/coordenadores", {
-        method: "POST",
+        method: editandoId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, foto_url }),
+        body: JSON.stringify({ ...form, id: editandoId, ...(foto_url && { foto_url }) }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setModal(false);
+      setEditandoId(null);
       setForm({ nome: "", email: "", senha: "" });
       setFoto(null);
       carregar();
@@ -57,6 +59,22 @@ export default function CoordenadoresPage() {
     } finally {
       setSalvando(false);
     }
+  };
+
+  const handleEdit = (c: Coordenador) => {
+    setEditandoId(c.id);
+    setForm({ nome: c.nome, email: c.email, senha: "" });
+    setModal(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este coordenador?")) return;
+    await fetch("/api/admin/coordenadores", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    carregar();
   };
 
   const toggleAtivo = async (id: string, ativo: boolean) => {
@@ -77,7 +95,11 @@ export default function CoordenadoresPage() {
         </div>
         <button
           id="btn-novo-coordenador"
-          onClick={() => setModal(true)}
+          onClick={() => {
+            setEditandoId(null);
+            setForm({ nome: "", email: "", senha: "" });
+            setModal(true);
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
         >
           + Novo Coordenador
@@ -95,16 +117,30 @@ export default function CoordenadoresPage() {
                 <p className="font-semibold text-gray-900 truncate">{c.nome}</p>
                 <p className="text-sm text-gray-500 truncate">{c.email}</p>
                 <div className="mt-2">
-                  <button
-                    onClick={() => toggleAtivo(c.id, c.ativo)}
-                    className={`text-xs px-2 py-0.5 rounded-full font-medium border ${
-                      c.ativo
-                        ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                        : "bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100"
-                    }`}
-                  >
-                    {c.ativo ? "✓ Ativo" : "○ Inativo"}
-                  </button>
+                  <div className="flex items-center gap-2 mt-2">
+                    <button
+                      onClick={() => toggleAtivo(c.id, c.ativo)}
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${
+                        c.ativo
+                          ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                          : "bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100"
+                      }`}
+                    >
+                      {c.ativo ? "✓ Ativo" : "○ Inativo"}
+                    </button>
+                    <button
+                      onClick={() => handleEdit(c)}
+                      className="text-[10px] px-2 py-0.5 rounded-full font-medium border bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                    >
+                      ✎ Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(c.id)}
+                      className="text-[10px] px-2 py-0.5 rounded-full font-medium border bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+                    >
+                      🗑 Excluir
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -118,11 +154,12 @@ export default function CoordenadoresPage() {
         </div>
       )}
 
-      {/* Modal */}
       {modal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Novo Coordenador</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-4">
+              {editandoId ? "Editar Coordenador" : "Novo Coordenador"}
+            </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
@@ -146,14 +183,16 @@ export default function CoordenadoresPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Senha {editandoId && <span className="text-gray-400 font-normal">(deixe em branco para manter)</span>}
+                </label>
                 <input
                   type="password"
-                  required
+                  required={!editandoId}
                   value={form.senha}
                   onChange={(e) => setForm({ ...form, senha: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder={editandoId ? "Nova senha (opcional)" : "Mínimo 6 caracteres"}
                   minLength={6}
                 />
               </div>
@@ -180,7 +219,7 @@ export default function CoordenadoresPage() {
                   disabled={salvando}
                   className="flex-1 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-medium disabled:opacity-50"
                 >
-                  {salvando ? "Salvando..." : "Cadastrar"}
+                  {salvando ? "Salvando..." : (editandoId ? "Salvar Alterações" : "Cadastrar")}
                 </button>
               </div>
             </form>

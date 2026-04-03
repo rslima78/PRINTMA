@@ -16,6 +16,7 @@ model Usuario {
   perfil    Perfil
   foto_url  String?
   ativo     Boolean  @default(true)
+  deletado  Boolean  @default(false)
   criado_em DateTime @default(now())
   pedidos   Pedido[]
 }
