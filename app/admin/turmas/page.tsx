@@ -47,10 +47,28 @@ export default function TurmasPage() {
   const salvarEdicao = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editando) return;
-    // PATCH simples via importar — na prática seria um endpoint de update
-    // Por ora, vamos apenas fechar o modal
-    setModal(null);
-    setEditando(null);
+    
+    try {
+      const res = await fetch("/api/admin/importar/turmas", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editando.id,
+          nome: editando.nome,
+          num_estudantes: editando.num_estudantes
+        }),
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      
+      setMsg("Turma atualizada com sucesso!");
+      setModal(null);
+      setEditando(null);
+      carregar();
+    } catch (error: any) {
+      alert(error.message);
+    }
   };
 
   return (
@@ -82,7 +100,7 @@ export default function TurmasPage() {
                 <tr>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Nome</th>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Nº Estudantes</th>
-                  <th className="w-32 px-6 py-3"></th>
+                  <th className="w-48 px-6 py-3"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -90,8 +108,19 @@ export default function TurmasPage() {
                   <tr key={t.id} className="hover:bg-gray-50">
                     <td className="px-6 py-3 text-sm font-medium text-gray-800">{t.nome}</td>
                     <td className="px-6 py-3 text-sm text-gray-600">{t.num_estudantes} alunos</td>
-                    <td className="px-6 py-3 text-right">
-                      <button onClick={() => excluir(t.id)} className="text-xs text-red-500 hover:text-red-700">Excluir</button>
+                    <td className="px-6 py-3 text-right space-x-3">
+                      <button 
+                        onClick={() => { setEditando(t); setModal("editar"); }} 
+                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        Editar
+                      </button>
+                      <button 
+                        onClick={() => excluir(t.id)} 
+                        className="text-xs text-red-500 hover:text-red-700"
+                      >
+                        Excluir
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -110,6 +139,58 @@ export default function TurmasPage() {
             </div>
             <p className="text-sm text-gray-500 mb-3">O CSV deve conter as colunas: <code className="bg-gray-100 px-1 rounded">nome</code> e <code className="bg-gray-100 px-1 rounded">num_estudantes</code></p>
             <ImportarCSV colunas={["nome", "num_estudantes"]} onImportar={importar} />
+          </div>
+        </div>
+      )}
+
+      {modal === "editar" && editando && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex justify-between mb-4">
+              <h2 className="text-lg font-bold">Editar Turma</h2>
+              <button onClick={() => { setModal(null); setEditando(null); }} className="text-gray-400 text-xl">×</button>
+            </div>
+            
+            <form onSubmit={salvarEdicao} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Nome da Turma</label>
+                <input
+                  type="text"
+                  required
+                  value={editando.nome}
+                  onChange={(e) => setEditando({ ...editando, nome: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Quantidade de Estudantes</label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  value={editando.num_estudantes}
+                  onChange={(e) => setEditando({ ...editando, num_estudantes: parseInt(e.target.value) })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => { setModal(null); setEditando(null); }}
+                  className="px-4 py-2 text-gray-600 font-semibold hover:bg-gray-100 rounded-xl transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+                >
+                  Salvar Alterações
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

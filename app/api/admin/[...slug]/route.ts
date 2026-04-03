@@ -144,6 +144,18 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ slug: s
       const atualizado = await prisma.usuario.update({ where: { id }, data });
       return NextResponse.json(atualizado);
     }
+    else if (slug[0] === "importar" && slug[1] === "turmas") {
+      const { id, nome, num_estudantes } = await req.json();
+      const data: any = {};
+      if (nome) data.nome = nome;
+      if (num_estudantes !== undefined) data.num_estudantes = parseInt(num_estudantes);
+
+      const atualizado = await prisma.turma.update({
+        where: { id },
+        data
+      });
+      return NextResponse.json(atualizado);
+    }
 
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   } catch (error) {
