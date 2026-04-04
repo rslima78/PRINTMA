@@ -12,14 +12,23 @@ export default function OperadorDashboard() {
   const [pedidoSelecionado, setPedidoSelecionado] = useState<any | null>(null);
   const [busca, setBusca] = useState("");
   const [atualizando, setAtualizando] = useState(false);
+  const [coordenadores, setCoordenadores] = useState<any[]>([]);
+  const [filtroCoordenador, setFiltroCoordenador] = useState("");
 
   const carregar = async () => {
-    const res = await fetch("/api/pedidos?ativo=true");
+    const params = new URLSearchParams({ ativo: "true" });
+    if (filtroCoordenador) params.set("coordenador_id", filtroCoordenador);
+    const res = await fetch(`/api/pedidos?${params.toString()}`);
     setPedidos(await res.json());
     setLoading(false);
   };
 
-  useEffect(() => { carregar(); }, []);
+  const carregarCoordenadores = async () => {
+    const res = await fetch("/api/coordenadores");
+    if (res.ok) setCoordenadores(await res.json());
+  };
+
+  useEffect(() => { carregar(); carregarCoordenadores(); }, [filtroCoordenador]);
 
   const atualizar = (id: string) => carregar().then(() => {
     setPedidos((prev) => prev.map((p) => p.id === id ? { ...p } : p));
@@ -99,6 +108,20 @@ export default function OperadorDashboard() {
               <p className="text-lg font-bold">{folhasGrupo.NOVO}</p>
             </div>
           </div>
+        </div>
+
+        {/* Filtro por coordenador */}
+        <div className="mb-5">
+          <select
+            value={filtroCoordenador}
+            onChange={(e) => setFiltroCoordenador(e.target.value)}
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white appearance-none cursor-pointer"
+          >
+            <option value="">Todos os coordenadores</option>
+            {coordenadores.map((c) => (
+              <option key={c.id} value={c.id}>{c.nome}</option>
+            ))}
+          </select>
         </div>
 
         {/* Busca por professor */}
