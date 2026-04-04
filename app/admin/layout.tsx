@@ -10,6 +10,7 @@ const navItems = [
   { href: "/admin/professores", label: "Professores", icon: "🧑‍🏫" },
   { href: "/admin/turmas", label: "Turmas", icon: "🏫" },
   { href: "/admin/associacoes", label: "Associações", icon: "🔗" },
+  { href: "/admin/pedidos", label: "Apagar Pedidos", icon: "🗑️" },
   { href: "/admin/minha-conta", label: "Minha Conta", icon: "🔑" },
 ];
 

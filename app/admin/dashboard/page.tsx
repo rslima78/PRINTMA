@@ -11,6 +11,7 @@ export default function AdminDashboardPage() {
     { href: "/admin/professores", icon: "🧑‍🏫", label: "Professores", desc: "Cadastrar professores" },
     { href: "/admin/turmas", icon: "🏫", label: "Turmas", desc: "Cadastrar turmas e nº de alunos" },
     { href: "/admin/associacoes", icon: "🔗", label: "Associações", desc: "Vincular professor → disciplina → turmas" },
+    { href: "/admin/pedidos", icon: "🗑️", label: "Apagar Pedidos", desc: "Excluir pedidos de impressão" },
   ];
 
   return (

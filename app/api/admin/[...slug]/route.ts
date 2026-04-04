@@ -52,9 +52,21 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug: str
       if (entidade === "turmas") return NextResponse.json(await prisma.turma.findMany({ orderBy: { nome: "asc" } }));
       return NextResponse.json({ error: "Entidade inválida" }, { status: 400 });
     }
+    else if (slug[0] === "pedidos") {
+      const pedidos = await prisma.pedido.findMany({
+        include: {
+          coordenador: { select: { nome: true } },
+          professor: { select: { nome: true } },
+          turmas: true,
+        },
+        orderBy: { criado_em: "desc" },
+      });
+      return NextResponse.json(pedidos);
+    }
 
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   } catch (error) {
+    console.error("Erro na API Admin (GET):", error);
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
 }
@@ -188,6 +200,21 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ slug: 
         where: { id },
         data: { deletado: true, ativo: false }
       });
+      return NextResponse.json({ success: true });
+    }
+    else if (slug[0] === "pedidos") {
+      const { ids } = await req.json(); // Suporta exclusão em massa enviando array de IDs
+      
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return NextResponse.json({ error: "IDs não fornecidos para exclusão" }, { status: 400 });
+      }
+
+      await prisma.pedido.deleteMany({
+        where: {
+          id: { in: ids }
+        }
+      });
+      
       return NextResponse.json({ success: true });
     }
 
