@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Papa from "papaparse";
 
 interface Professor { id: string; nome: string; }
 interface Disciplina { id: string; nome: string; }
@@ -75,6 +76,27 @@ export default function AssociacoesPage() {
     }));
   };
 
+  const exportarCSV = () => {
+    if (associacoes.length === 0) {
+      alert("Nenhuma associação para exportar.");
+      return;
+    }
+    const dadosExportar = associacoes.map((a) => ({
+      Professor: a.professor.nome,
+      Disciplina: a.disciplina.nome,
+      Turmas: a.turmas.map((t) => t.turma.nome).join(", "),
+    }));
+    const csv = Papa.unparse(dadosExportar);
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "associacoes_professores_turmas.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
@@ -82,12 +104,20 @@ export default function AssociacoesPage() {
           <h1 className="text-2xl font-bold text-gray-900">Associações</h1>
           <p className="text-gray-500 text-sm mt-0.5">Professor → Disciplina → Turma(s)</p>
         </div>
-        <button
-          onClick={() => setModal(true)}
-          className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
-        >
-          + Nova Associação
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={exportarCSV}
+            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-1.5"
+          >
+            📥 Exportar CSV
+          </button>
+          <button
+            onClick={() => setModal(true)}
+            className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
+          >
+            + Nova Associação
+          </button>
+        </div>
       </div>
 
       {msg && <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm">{msg}</div>}

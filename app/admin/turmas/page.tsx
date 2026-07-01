@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { ImportarCSV } from "@/components/ImportarCSV";
+import Papa from "papaparse";
 
 interface Turma { id: string; nome: string; num_estudantes: number; }
 
@@ -71,6 +72,26 @@ export default function TurmasPage() {
     }
   };
 
+  const exportarCSV = () => {
+    if (turmas.length === 0) {
+      alert("Nenhuma turma para exportar.");
+      return;
+    }
+    const dadosExportar = turmas.map((t) => ({
+      Nome: t.nome,
+      "Nº Estudantes": t.num_estudantes,
+    }));
+    const csv = Papa.unparse(dadosExportar);
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "turmas.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
@@ -78,12 +99,20 @@ export default function TurmasPage() {
           <h1 className="text-2xl font-bold text-gray-900">Turmas</h1>
           <p className="text-gray-500 text-sm mt-0.5">{turmas.length} cadastrada(s)</p>
         </div>
-        <button
-          onClick={() => setModal("csv")}
-          className="px-4 py-2 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
-        >
-          📁 Importar CSV
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={exportarCSV}
+            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-1.5"
+          >
+            📥 Exportar CSV
+          </button>
+          <button
+            onClick={() => setModal("csv")}
+            className="px-4 py-2 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
+          >
+            📁 Importar CSV
+          </button>
+        </div>
       </div>
 
       {msg && <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm">{msg}</div>}
