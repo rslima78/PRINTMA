@@ -14,14 +14,17 @@ interface Pedido {
   id: string;
   tipo_avaliacao: string;
   disciplina_nome: string;
-  professor: { nome: string };
-  coordenador: { nome: string; foto_url?: string };
+  professor: { id?: string; nome: string };
+  coordenador: { id?: string; nome: string; foto_url?: string };
   turmas: PedidoTurma[];
   num_copias: number;
   folhas_necessarias: number;
   prazo: string;
+  criado_em?: string;
+  atualizado_em?: string;
   status: any;
   prioridade: boolean;
+  observacao?: string;
   obs_reimpressao?: string;
 }
 
@@ -31,6 +34,7 @@ interface Props {
   onPrioridadeToggle?: () => void;
   onReimprimir?: () => void;
   mostrarCoordenador?: boolean;
+  selecionado?: boolean;
 }
 
 const tipoLabels: Record<string, string> = {
@@ -39,14 +43,24 @@ const tipoLabels: Record<string, string> = {
   OUTROS: "Outros",
 };
 
-export function CardPedido({ pedido, onClick, onPrioridadeToggle, onReimprimir, mostrarCoordenador = true }: Props) {
+export function CardPedido({ pedido, onClick, onPrioridadeToggle, onReimprimir, mostrarCoordenador = true, selecionado = false }: Props) {
   const turmasNomes = pedido.turmas.map((t) => t.turma_nome).join(", ");
+  const dataSolicitacao = pedido.criado_em
+    ? format(new Date(pedido.criado_em), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
+    : null;
+  const dataConclusao = pedido.status === "CONCLUIDO" && pedido.atualizado_em
+    ? format(new Date(pedido.atualizado_em), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
+    : null;
 
   return (
     <div
       onClick={onClick}
       className={`relative bg-white rounded-xl border shadow-sm hover:shadow-md transition-all cursor-pointer p-4 ${
-        pedido.prioridade ? "border-yellow-400 ring-1 ring-yellow-300" : "border-gray-200"
+        selecionado
+          ? "border-indigo-500 ring-2 ring-indigo-300"
+          : pedido.prioridade
+          ? "border-yellow-400 ring-1 ring-yellow-300"
+          : "border-gray-200"
       }`}
     >
       {pedido.prioridade && (
@@ -69,6 +83,16 @@ export function CardPedido({ pedido, onClick, onPrioridadeToggle, onReimprimir, 
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             <span className="text-xs text-gray-600">📄 {pedido.folhas_necessarias} folhas</span>
             <span className="text-xs text-gray-600">🖨️ {pedido.num_copias} cópias</span>
+            {dataSolicitacao && (
+              <span className="text-xs text-gray-400" title="Data da solicitação">
+                🕒 Solic.: {dataSolicitacao}
+              </span>
+            )}
+            {dataConclusao && (
+              <span className="text-xs text-green-700 font-medium" title="Data da conclusão">
+                ✓ Concl.: {dataConclusao}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2 mt-2 flex-wrap">

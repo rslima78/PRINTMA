@@ -19,6 +19,12 @@ export function ResumoPedido({ pedido }: Props) {
     ["Turma(s)", pedido.turmas?.map((t: any) => t.turma_nome).join(", ")],
     ["Nº de Cópias", pedido.num_copias],
     ["Folhas Necessárias", pedido.folhas_necessarias],
+    ...(pedido.criado_em
+      ? [["Solicitado em", format(new Date(pedido.criado_em), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })]]
+      : []),
+    ...(pedido.status === "CONCLUIDO" && pedido.atualizado_em
+      ? [["Concluído em", format(new Date(pedido.atualizado_em), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })]]
+      : []),
     ["Prazo de Entrega", format(new Date(pedido.prazo), "dd/MM/yyyy", { locale: ptBR })],
     ["Observação", pedido.observacao || "—"],
   ];

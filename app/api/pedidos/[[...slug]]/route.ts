@@ -47,13 +47,65 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug?: st
     const status = searchParams.get("status");
     const coordenador_id = searchParams.get("coordenador_id");
     const professor_id = searchParams.get("professor_id");
+    const disciplina_nome = searchParams.get("disciplina_nome");
+    const turma_nome = searchParams.get("turma_nome");
+    const tipo_avaliacao = searchParams.get("tipo_avaliacao");
+    const prioridade = searchParams.get("prioridade");
     const ativo = searchParams.get("ativo");
+    const busca = searchParams.get("busca")?.trim();
+    const data_inicio = searchParams.get("data_inicio");
+    const data_fim = searchParams.get("data_fim");
+    const ordem = searchParams.get("ordem");
 
     const where: any = {};
-    if (status) where.status = status;
+    if (status && status !== "TODOS") {
+      if (status === "PENDENTE") {
+        where.status = { in: ["AGUARDANDO", "EM_IMPRESSAO"] };
+      } else {
+        where.status = status;
+      }
+    } else if (ativo === "true") {
+      where.status = { in: ["AGUARDANDO", "EM_IMPRESSAO"] };
+    }
+
     if (coordenador_id) where.coordenador_id = coordenador_id;
     if (professor_id) where.professor_id = professor_id;
-    if (ativo === "true") where.status = { in: ["AGUARDANDO", "EM_IMPRESSAO"] };
+    if (disciplina_nome) where.disciplina_nome = disciplina_nome;
+    if (tipo_avaliacao) where.tipo_avaliacao = tipo_avaliacao;
+    if (prioridade === "true") where.prioridade = true;
+    if (turma_nome) {
+      where.turmas = { some: { turma_nome } };
+    }
+
+    if (data_inicio || data_fim) {
+      where.criado_em = {};
+      if (data_inicio) {
+        where.criado_em.gte = new Date(`${data_inicio}T00:00:00.000`);
+      }
+      if (data_fim) {
+        where.criado_em.lte = new Date(`${data_fim}T23:59:59.999`);
+      }
+    }
+
+    if (busca) {
+      where.OR = [
+        { professor: { nome: { contains: busca, mode: "insensitive" } } },
+        { disciplina_nome: { contains: busca, mode: "insensitive" } } },
+        { coordenador: { nome: { contains: busca, mode: "insensitive" } } },
+        { observacao: { contains: busca, mode: "insensitive" } } },
+        { obs_reimpressao: { contains: busca, mode: "insensitive" } } },
+        { turmas: { some: { turma_nome: { contains: busca, mode: "insensitive" } } } },
+      ];
+    }
+
+    let orderBy: any = [{ prioridade: "desc" }, { criado_em: "asc" }];
+    if (ordem === "recente") {
+      orderBy = [{ criado_em: "desc" }];
+    } else if (ordem === "antigo") {
+      orderBy = [{ criado_em: "asc" }];
+    } else if (ordem === "prazo") {
+      orderBy = [{ prazo: "asc" }, { prioridade: "desc" }];
+    }
 
     const pedidos = await prisma.pedido.findMany({
       where,
@@ -63,7 +115,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug?: st
         turmas: true,
         historico: { orderBy: { criado_em: "desc" }, take: 5 },
       },
-      orderBy: [{ prioridade: "desc" }, { criado_em: "asc" }],
+      orderBy,
     });
 
     const pedidosComUrlAssinada = pedidos.map(p => ({

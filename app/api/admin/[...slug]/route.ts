@@ -17,12 +17,13 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug: str
 
     const isAdmin = userPerfil === "ADMIN";
     const isCoordenador = userPerfil === "COORDENADOR";
+    const isOperador = userPerfil === "OPERADOR";
 
-    // Permitir COORDENADOR acessar associações e professores
+    // Permitir COORDENADOR e OPERADOR consultarem listas para filtros/seletores (GET apenas)
     const canAccessAssociacoes = slug[0] === "associacoes";
-    const canAccessProfessores = slug[0] === "importar" && slug[1] === "professores";
+    const canAccessCatalogos = slug[0] === "importar" && ["professores", "disciplinas", "turmas"].includes(slug[1]);
 
-    if (!isAdmin && (!isCoordenador || (!canAccessAssociacoes && !canAccessProfessores))) {
+    if (!isAdmin && !(isCoordenador && (canAccessAssociacoes || canAccessCatalogos)) && !(isOperador && canAccessCatalogos)) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
