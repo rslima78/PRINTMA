@@ -56,8 +56,8 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug: str
     else if (slug[0] === "pedidos") {
       const pedidos = await prisma.pedido.findMany({
         include: {
-          coordenador: { select: { nome: true } },
-          professor: { select: { nome: true } },
+          coordenador: { select: { id: true, nome: true, foto_url: true } },
+          professor: { select: { id: true, nome: true } },
           turmas: true,
         },
         orderBy: { criado_em: "desc" },
