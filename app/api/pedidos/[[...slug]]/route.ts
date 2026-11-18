@@ -90,10 +90,10 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug?: st
     if (busca) {
       where.OR = [
         { professor: { nome: { contains: busca, mode: "insensitive" } } },
-        { disciplina_nome: { contains: busca, mode: "insensitive" } } },
+        { disciplina_nome: { contains: busca, mode: "insensitive" } },
         { coordenador: { nome: { contains: busca, mode: "insensitive" } } },
-        { observacao: { contains: busca, mode: "insensitive" } } },
-        { obs_reimpressao: { contains: busca, mode: "insensitive" } } },
+        { observacao: { contains: busca, mode: "insensitive" } },
+        { obs_reimpressao: { contains: busca, mode: "insensitive" } },
         { turmas: { some: { turma_nome: { contains: busca, mode: "insensitive" } } } },
       ];
     }
